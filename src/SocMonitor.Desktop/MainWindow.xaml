@@ -1,0 +1,251 @@
+<Window x:Class="SocMonitor.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="SOC Modbus 数据采集与算法验证"
+        Width="1180"
+        Height="760"
+        MinWidth="980"
+        MinHeight="620"
+        Background="#F5F7FA">
+    <Window.Resources>
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <Style x:Key="InputStyle" TargetType="Control">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Margin" Value="0,4,12,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#D8DEE8"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="串口" Foreground="#5B6472" />
+                    <TextBox Width="92"
+                             Style="{StaticResource InputStyle}"
+                             Text="{Binding PortName, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="浮点字节序" Foreground="#5B6472" />
+                    <ComboBox Width="112"
+                              Style="{StaticResource InputStyle}"
+                              ItemsSource="{Binding FloatByteOrderNames}"
+                              SelectedItem="{Binding SelectedFloatByteOrderName}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="算法" Foreground="#5B6472" />
+                    <ComboBox Width="180"
+                              Style="{StaticResource InputStyle}"
+                              ItemsSource="{Binding AlgorithmNames}"
+                              SelectedItem="{Binding SelectedAlgorithmName}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="工况" Foreground="#5B6472" />
+                    <ComboBox Width="170"
+                              Style="{StaticResource InputStyle}"
+                              ItemsSource="{Binding WorkConditionNames}"
+                              SelectedItem="{Binding SelectedWorkConditionName}" />
+                </StackPanel>
+
+                <CheckBox Grid.Column="4"
+                          Margin="8,24,0,0"
+                          VerticalAlignment="Top"
+                          Content="使用仿真数据"
+                          IsChecked="{Binding UseSimulation}" />
+
+                <StackPanel Grid.Column="5"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Ellipse Width="18" Height="18" Margin="0,0,8,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="#D94141" />
+                                <Setter Property="Stroke" Value="#A82E2E" />
+                                <Setter Property="StrokeThickness" Value="1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCommunicationOk}" Value="True">
+                                        <Setter Property="Fill" Value="#20A464" />
+                                        <Setter Property="Stroke" Value="#157A49" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock VerticalAlignment="Center"
+                               FontWeight="SemiBold"
+                               Text="{Binding CommunicationText}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Margin="0,12,0,12"
+                Background="White"
+                BorderBrush="#D8DEE8"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Width="164"
+                        Height="46"
+                        Margin="0,0,14,0"
+                        Padding="10,0"
+                        Background="#F7F9FC"
+                        BorderBrush="#C9D3E2"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Ellipse Width="26" Height="26" Margin="0,0,10,0">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="#D94141" />
+                                    <Setter Property="Stroke" Value="#A82E2E" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCommunicationOk}" Value="True">
+                                            <Setter Property="Fill" Value="#20A464" />
+                                            <Setter Property="Stroke" Value="#157A49" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <StackPanel>
+                            <TextBlock Text="串口通讯"
+                                       FontSize="12"
+                                       Foreground="#5B6472" />
+                            <TextBlock Text="{Binding CommunicationText}"
+                                       FontWeight="SemiBold"
+                                       Foreground="#1F2937" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Content="开始采集"
+                            Command="{Binding StartCommand}" />
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Content="停止"
+                            Command="{Binding StopCommand}" />
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            MinWidth="112"
+                            Content="{Binding RecordButtonText}"
+                            Command="{Binding SaveDataCommand}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Status}"
+                               Foreground="#253044"
+                               TextWrapping="Wrap" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="{Binding LatestDataText}"
+                               Foreground="#5B6472"
+                               TextWrapping="Wrap" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="{Binding LastSavedFile}"
+                               Foreground="#667085"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Column="0"
+                    Grid.Row="0"
+                    Margin="0,0,8,8"
+                    Background="White"
+                    BorderBrush="#D8DEE8"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <oxy:PlotView Model="{Binding CurrentPlotModel}" />
+            </Border>
+
+            <Border Grid.Column="1"
+                    Grid.Row="0"
+                    Margin="8,0,0,8"
+                    Background="White"
+                    BorderBrush="#D8DEE8"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <oxy:PlotView Model="{Binding VoltagePlotModel}" />
+            </Border>
+
+            <Border Grid.Column="0"
+                    Grid.Row="1"
+                    Margin="0,8,8,0"
+                    Background="White"
+                    BorderBrush="#D8DEE8"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <oxy:PlotView Model="{Binding TemperaturePlotModel}" />
+            </Border>
+
+            <Border Grid.Column="1"
+                    Grid.Row="1"
+                    Margin="8,8,0,0"
+                    Background="White"
+                    BorderBrush="#D8DEE8"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <oxy:PlotView Model="{Binding VibrationPlotModel}" />
+            </Border>
+        </Grid>
+
+        <TextBlock Grid.Row="3"
+                   Margin="0,12,0,0"
+                   Foreground="#5B6472"
+                   Text="固定通讯参数：设备地址 1，波特率 9600，校验 None，数据位 8，停止位 1。寄存器使用 0x03 读取保持寄存器。"
+                   TextWrapping="Wrap" />
+    </Grid>
+</Window>

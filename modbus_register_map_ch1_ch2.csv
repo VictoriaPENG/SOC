@@ -1,0 +1,17 @@
+group,channel,name,address_hex,function_code,data_type,register_count,byte_order,unit,description
+engineering,1,Channel 1 Engineering Value,0x2000,0x03,float,2,configurable,,Default float order per device setting; verify with 1.00 example
+engineering,2,Channel 2 Engineering Value,0x2002,0x03,float,2,configurable,,Default float order per device setting
+quality,1,Channel 1 Quality Code,0x2080,0x03,uint16,1,normal,,Bit0 normal/high-high; Bit1 high; Bit2 low; Bit3 low-low; Bit4 disconnected; Bit5 below lower limit; Bit6 above upper limit
+quality,2,Channel 2 Quality Code,0x2081,0x03,uint16,1,normal,,Same bit definition as channel 1
+flow,1,Channel 1 Flow Value,0x2100,0x03,float,2,configurable,,
+flow,2,Channel 2 Flow Value,0x2102,0x03,float,2,configurable,,
+status,1,Flow Channel 1 Status,0x2150,0x03,uint16,1,normal,,Same register meaning as quality/status table
+status,2,Flow Channel 2 Status,0x2151,0x03,uint16,1,normal,,
+total,1,Channel 1 Total Accumulated Integer,0x22C0,0x03,int32,2,normal,,Integer part of accumulated value
+total,2,Channel 2 Total Accumulated Integer,0x22C2,0x03,int32,2,normal,,Integer part of accumulated value
+time_total,1,Channel 1 Timed Accumulated Value,0x2310,0x03,float,2,configurable,,
+time_total,2,Channel 2 Timed Accumulated Value,0x2312,0x03,float,2,configurable,,
+day_total,1,Channel 1 Daily Accumulated Value,0x2360,0x03,float,2,configurable,,
+day_total,2,Channel 2 Daily Accumulated Value,0x2362,0x03,float,2,configurable,,
+month_total,1,Channel 1 Monthly Accumulated Value,0x23B0,0x03,float,2,configurable,,
+month_total,2,Channel 2 Monthly Accumulated Value,0x23B2,0x03,float,2,configurable,,
