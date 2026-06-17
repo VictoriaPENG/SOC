@@ -1,4 +1,5 @@
 <Window x:Class="SocMonitor.Desktop.MainWindow"
+        x:Name="RootWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:oxy="http://oxyplot.org/wpf"
@@ -21,7 +22,14 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="18">
+    <!--
+        主界面分四行：
+        1. 顶部菜单栏：串口、浮点字节序、算法、工况、仿真数据开关。
+        2. 操作/状态栏：通讯状态灯、开始/停止/保存按钮、实时状态文本。
+        3. 示波器区域：左侧四个小示波器，右侧一个大 SOC 示波器。
+        4. 固定通讯参数说明。
+    -->
+    <Grid Margin="0,0,18,18">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -29,86 +37,130 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- 顶部参数菜单。菜单标题显示“名称：当前值”，下拉项负责更新 ViewModel 中的当前选择。 -->
         <Border Grid.Row="0"
                 Background="White"
                 BorderBrush="#D8DEE8"
                 BorderThickness="1"
-                CornerRadius="6"
-                Padding="14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="串口" Foreground="#5B6472" />
-                    <TextBox Width="92"
-                             Style="{StaticResource InputStyle}"
-                             Text="{Binding PortName, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="浮点字节序" Foreground="#5B6472" />
-                    <ComboBox Width="112"
-                              Style="{StaticResource InputStyle}"
-                              ItemsSource="{Binding FloatByteOrderNames}"
-                              SelectedItem="{Binding SelectedFloatByteOrderName}" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="算法" Foreground="#5B6472" />
-                    <ComboBox Width="180"
-                              Style="{StaticResource InputStyle}"
-                              ItemsSource="{Binding AlgorithmNames}"
-                              SelectedItem="{Binding SelectedAlgorithmName}" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="3">
-                    <TextBlock Text="工况" Foreground="#5B6472" />
-                    <ComboBox Width="170"
-                              Style="{StaticResource InputStyle}"
-                              ItemsSource="{Binding WorkConditionNames}"
-                              SelectedItem="{Binding SelectedWorkConditionName}" />
-                </StackPanel>
-
-                <CheckBox Grid.Column="4"
-                          Margin="8,24,0,0"
-                          VerticalAlignment="Top"
+                CornerRadius="0,0,6,6"
+                Padding="0">
+            <DockPanel>
+                <!-- 仿真数据开关保留在菜单栏右侧；开启后不会把通讯灯误显示为串口成功。 -->
+                <CheckBox DockPanel.Dock="Right"
+                          Margin="0,0,14,0"
+                          VerticalAlignment="Center"
                           Content="使用仿真数据"
                           IsChecked="{Binding UseSimulation}" />
 
-                <StackPanel Grid.Column="5"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <Ellipse Width="18" Height="18" Margin="0,0,8,0">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="#D94141" />
-                                <Setter Property="Stroke" Value="#A82E2E" />
-                                <Setter Property="StrokeThickness" Value="1" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsCommunicationOk}" Value="True">
-                                        <Setter Property="Fill" Value="#20A464" />
-                                        <Setter Property="Stroke" Value="#157A49" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock VerticalAlignment="Center"
-                               FontWeight="SemiBold"
-                               Text="{Binding CommunicationText}" />
-                </StackPanel>
-            </Grid>
+                <Menu Background="White"
+                      BorderThickness="0"
+                      Padding="4,0">
+                    <MenuItem>
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="串口" />
+                                <TextBlock Text="：" />
+                                <TextBlock Text="{Binding PortName}" />
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Header="COM1"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM1" />
+                        <MenuItem Header="COM2"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM2" />
+                        <MenuItem Header="COM3"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM3" />
+                        <MenuItem Header="COM4"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM4" />
+                        <MenuItem Header="COM5"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM5" />
+                        <MenuItem Header="COM6"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM6" />
+                        <MenuItem Header="COM7"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM7" />
+                        <MenuItem Header="COM8"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM8" />
+                        <MenuItem Header="COM9"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM9" />
+                        <MenuItem Header="COM10"
+                                  Command="{Binding DataContext.SelectPortCommand, ElementName=RootWindow}"
+                                  CommandParameter="COM10" />
+                    </MenuItem>
+
+                    <MenuItem>
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="浮点字节序" />
+                                <TextBlock Text="：" />
+                                <TextBlock Text="{Binding SelectedFloatByteOrderName}" />
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Header="ABCD"
+                                  Command="{Binding DataContext.SelectFloatByteOrderCommand, ElementName=RootWindow}"
+                                  CommandParameter="ABCD" />
+                        <MenuItem Header="CDAB"
+                                  Command="{Binding DataContext.SelectFloatByteOrderCommand, ElementName=RootWindow}"
+                                  CommandParameter="CDAB" />
+                        <MenuItem Header="BADC"
+                                  Command="{Binding DataContext.SelectFloatByteOrderCommand, ElementName=RootWindow}"
+                                  CommandParameter="BADC" />
+                        <MenuItem Header="DCBA"
+                                  Command="{Binding DataContext.SelectFloatByteOrderCommand, ElementName=RootWindow}"
+                                  CommandParameter="DCBA" />
+                    </MenuItem>
+
+                    <MenuItem>
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="算法" />
+                                <TextBlock Text="：" />
+                                <TextBlock Text="{Binding SelectedAlgorithmName}" />
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Header="透传算法 (PT)"
+                                  Command="{Binding DataContext.SelectAlgorithmCommand, ElementName=RootWindow}"
+                                  CommandParameter="透传算法 (PT)" />
+                        <MenuItem Header="一阶卡尔曼滤波 (KF)"
+                                  Command="{Binding DataContext.SelectAlgorithmCommand, ElementName=RootWindow}"
+                                  CommandParameter="一阶卡尔曼滤波 (KF)" />
+                    </MenuItem>
+
+                    <MenuItem>
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="工况" />
+                                <TextBlock Text="：" />
+                                <TextBlock Text="{Binding SelectedWorkConditionName}" />
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Header="静置 (REST)"
+                                  Command="{Binding DataContext.SelectWorkConditionCommand, ElementName=RootWindow}"
+                                  CommandParameter="静置 (REST)" />
+                        <MenuItem Header="恒流充电 (CC-C)"
+                                  Command="{Binding DataContext.SelectWorkConditionCommand, ElementName=RootWindow}"
+                                  CommandParameter="恒流充电 (CC-C)" />
+                        <MenuItem Header="恒流放电 (CC-D)"
+                                  Command="{Binding DataContext.SelectWorkConditionCommand, ElementName=RootWindow}"
+                                  CommandParameter="恒流放电 (CC-D)" />
+                        <MenuItem Header="脉冲工况 (PULSE)"
+                                  Command="{Binding DataContext.SelectWorkConditionCommand, ElementName=RootWindow}"
+                                  CommandParameter="脉冲工况 (PULSE)" />
+                    </MenuItem>
+                </Menu>
+            </DockPanel>
         </Border>
 
+        <!-- 操作与状态区域。左侧是串口通讯灯，中间是采集/保存命令，右侧显示实时状态和最新数据。 -->
         <Border Grid.Row="1"
-                Margin="0,12,0,12"
+                Margin="18,12,0,12"
                 Background="White"
                 BorderBrush="#D8DEE8"
                 BorderThickness="1"
@@ -158,7 +210,10 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- 三个主要操作按钮均绑定到 MainViewModel 的 RelayCommand。 -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
                     <Button Style="{StaticResource ToolbarButtonStyle}"
                             Content="开始采集"
                             Command="{Binding StartCommand}" />
@@ -187,63 +242,98 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="2">
+        <!-- 示波器区域。SOC 面板高度 516，正好与左侧 2x2 面板总高度对齐。 -->
+        <Grid Grid.Row="2"
+              Margin="18,0,0,0"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
 
-            <Border Grid.Column="0"
-                    Grid.Row="0"
-                    Margin="0,0,8,8"
-                    Background="White"
-                    BorderBrush="#D8DEE8"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="8">
-                <oxy:PlotView Model="{Binding CurrentPlotModel}" />
-            </Border>
+            <!-- 左侧四个方形示波器：电压、电流、温度、振动。 -->
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
+                <!-- 通讯状态灯：IsCommunicationOk=true 时为绿色，否则为红色。 -->
+                <Border Grid.Column="0"
+                        Grid.Row="0"
+                        Width="250"
+                        Height="250"
+                        Margin="0,0,8,8"
+                        Background="White"
+                        BorderBrush="#D8DEE8"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="2">
+                    <oxy:PlotView Model="{Binding VoltagePlotModel}" />
+                </Border>
+
+                <Border Grid.Column="1"
+                        Grid.Row="0"
+                        Width="250"
+                        Height="250"
+                        Margin="8,0,0,8"
+                        Background="White"
+                        BorderBrush="#D8DEE8"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="2">
+                    <oxy:PlotView Model="{Binding CurrentPlotModel}" />
+                </Border>
+
+                <Border Grid.Column="0"
+                        Grid.Row="1"
+                        Width="250"
+                        Height="250"
+                        Margin="0,8,8,0"
+                        Background="White"
+                        BorderBrush="#D8DEE8"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="2">
+                    <oxy:PlotView Model="{Binding TemperaturePlotModel}" />
+                </Border>
+
+                <Border Grid.Column="1"
+                        Grid.Row="1"
+                        Width="250"
+                        Height="250"
+                        Margin="8,8,0,0"
+                        Background="White"
+                        BorderBrush="#D8DEE8"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="2">
+                    <oxy:PlotView Model="{Binding VibrationPlotModel}" />
+                </Border>
+            </Grid>
+
+            <!-- 右侧 SOC 估计值示波器，与左侧上下边齐平。 -->
             <Border Grid.Column="1"
-                    Grid.Row="0"
-                    Margin="8,0,0,8"
+                    Width="516"
+                    Height="516"
+                    Margin="16,0,0,0"
+                    VerticalAlignment="Stretch"
                     Background="White"
                     BorderBrush="#D8DEE8"
                     BorderThickness="1"
                     CornerRadius="6"
-                    Padding="8">
-                <oxy:PlotView Model="{Binding VoltagePlotModel}" />
-            </Border>
-
-            <Border Grid.Column="0"
-                    Grid.Row="1"
-                    Margin="0,8,8,0"
-                    Background="White"
-                    BorderBrush="#D8DEE8"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="8">
-                <oxy:PlotView Model="{Binding TemperaturePlotModel}" />
-            </Border>
-
-            <Border Grid.Column="1"
-                    Grid.Row="1"
-                    Margin="8,8,0,0"
-                    Background="White"
-                    BorderBrush="#D8DEE8"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="8">
-                <oxy:PlotView Model="{Binding VibrationPlotModel}" />
+                    Padding="2">
+                <oxy:PlotView Model="{Binding SocPlotModel}" />
             </Border>
         </Grid>
 
         <TextBlock Grid.Row="3"
-                   Margin="0,12,0,0"
+                   Margin="18,12,0,0"
                    Foreground="#5B6472"
                    Text="固定通讯参数：设备地址 1，波特率 9600，校验 None，数据位 8，停止位 1。寄存器使用 0x03 读取保持寄存器。"
                    TextWrapping="Wrap" />

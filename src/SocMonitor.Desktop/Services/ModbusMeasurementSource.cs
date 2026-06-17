@@ -5,6 +5,10 @@ using SocMonitor.Desktop.Models;
 
 namespace SocMonitor.Desktop.Services;
 
+/// <summary>
+/// Modbus RTU 串口数据源。
+/// 负责打开串口、创建 NModbus RTU 主站、按固定寄存器表读取一帧 MeasurementSample。
+/// </summary>
 public sealed class ModbusMeasurementSource : IMeasurementSource
 {
     private readonly ModbusConnectionOptions _options;
@@ -20,6 +24,7 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
     public async IAsyncEnumerable<MeasurementSample> ReadSamplesAsync(
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        // 第一次采集前才真正打开串口，便于界面先完成参数选择。
         EnsureConnected();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -36,6 +41,7 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
             return;
         }
 
+        // SerialPort 负责底层串口，NModbus 通过 IStreamResource 读写 RTU 帧。
         _serialPort = new SerialPort(_options.PortName, _options.BaudRate, _options.Parity, _options.DataBits, _options.StopBits)
         {
             ReadTimeout = _options.ReadTimeoutMilliseconds,
@@ -50,6 +56,10 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
         _master.Transport.Retries = 0;
     }
 
+    /// <summary>
+    /// 按当前设备寄存器表读取所有需要的通道。
+    /// 地址以 0x2000、0x2100 等保持寄存器地址为准，使用 0x03 功能码读取。
+    /// </summary>
     private MeasurementSample ReadCurrentSample()
     {
         return new MeasurementSample(
@@ -78,18 +88,24 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
         return _master!.ReadHoldingRegisters(_options.SlaveId, address, 1)[0];
     }
 
+    // 32 位整数固定按 ABCD 拼接；如果设备整数也存在字节序差异，可在这里扩展配置项。
     private int ReadInt32(ushort address)
     {
         ushort[] registers = _master!.ReadHoldingRegisters(_options.SlaveId, address, 2);
         return BitConverter.ToInt32(ToOrderedBytes(registers, RegisterByteOrder.ABCD), 0);
     }
 
+    // 浮点数使用界面选择的字节序，解决不同仪表/PLC 寄存器排列不一致的问题。
     private float ReadFloat(ushort address)
     {
         ushort[] registers = _master!.ReadHoldingRegisters(_options.SlaveId, address, 2);
         return BitConverter.ToSingle(ToOrderedBytes(registers, _options.FloatByteOrder), 0);
     }
 
+    /// <summary>
+    /// 把两个 16 位寄存器转换成 BitConverter 可直接读取的 4 字节数组。
+    /// BitConverter 使用本机小端序，所以最后需要根据系统端序反转。
+    /// </summary>
     private static byte[] ToOrderedBytes(IReadOnlyList<ushort> registers, RegisterByteOrder order)
     {
         byte a = (byte)(registers[0] >> 8);
@@ -115,10 +131,14 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
 
     public ValueTask DisposeAsync()
     {
+        // 释放串口句柄，避免下次采集或其他串口工具无法打开同一个 COM 口。
         _serialPort?.Dispose();
         return ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// NModbus 需要 IStreamResource；这里把 System.IO.Ports.SerialPort 包装成它能使用的流资源。
+    /// </summary>
     private sealed class SerialPortStreamResource : IStreamResource
     {
         private readonly SerialPort _serialPort;
@@ -150,6 +170,7 @@ public sealed class ModbusMeasurementSource : IMeasurementSource
 
         public void Dispose()
         {
+            // SerialPort 生命周期由外层 ModbusMeasurementSource 管理，这里不重复 Dispose。
         }
     }
 }

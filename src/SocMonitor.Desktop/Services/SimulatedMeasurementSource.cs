@@ -2,6 +2,11 @@ using SocMonitor.Desktop.Models;
 
 namespace SocMonitor.Desktop.Services;
 
+/// <summary>
+/// 仿真数据源。
+/// 在没有真实串口设备时，用不同频率的正弦/余弦波模拟电流、电压、温度、振动等通道，
+/// 方便验证界面刷新、算法输出和 CSV 保存流程。
+/// </summary>
 public sealed class SimulatedMeasurementSource : IMeasurementSource
 {
     private readonly TimeSpan _interval;
@@ -16,6 +21,7 @@ public sealed class SimulatedMeasurementSource : IMeasurementSource
     {
         while (!cancellationToken.IsCancellationRequested)
         {
+            // 使用持续增长的相位生成平滑变化的曲线，避免所有通道完全同步。
             _phase += 0.15;
             yield return new MeasurementSample(
                 DateTimeOffset.Now,
@@ -37,6 +43,7 @@ public sealed class SimulatedMeasurementSource : IMeasurementSource
                 MonthlyTotalChannel2: 5100 + _phase,
                 AlgorithmEstimate: 0);
 
+            // 按指定周期暂停；取消采集时 Task.Delay 会抛出 OperationCanceledException。
             await Task.Delay(_interval, cancellationToken);
         }
     }
